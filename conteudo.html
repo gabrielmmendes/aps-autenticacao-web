@@ -1,0 +1,514 @@
+<!-- ===================================================== CAPA / CABEÇALHO -->
+<section class="capa">
+<p class="inst">UNIVERSIDADE FEDERAL DE GOIÁS<br/>INSTITUTO DE INFORMÁTICA<br/>BACHARELADO EM ENGENHARIA DE SOFTWARE</p>
+<p class="disc">Disciplina: <b>Domínios de Software</b> – semestre 2026/2</p>
+<p class="titulo">Atividades Práticas Supervisionadas (APS)<br/>Projeto de Software Web para Autenticação de Usuários</p>
+<p class="sub">Tarefa: explicação do ambiente operacional Web e projeto da arquitetura<br/>e do desenho detalhado de componentes da aplicação</p>
+<p class="autores"><span class="rot">Autoria (ordem alfabética)</span><br/><!--AUTORES--></p>
+<p class="local">Goiânia, 27 de outubro de 2026</p>
+</section>
+
+<!-- ===================================================== SUMÁRIO -->
+<h1 class="nova" id="sumario">Sumário</h1>
+<ul class="sumario">
+<li class="n1"><a href="#apresentacao">Apresentação e organização do documento</a></li>
+<li class="n1"><a href="#controle-autoria">Controle de autoria e revisão dos itens de informação</a></li>
+<li class="n1"><a href="#nota-ia">Nota sobre o uso de inteligência artificial</a></li>
+<li class="n1"><a href="#secao-1">1 Ambiente operacional de uma aplicação Web</a></li>
+<li class="n2"><a href="#i1-1">1.1 Visão geral do ambiente operacional</a></li>
+<li class="n2"><a href="#i1-2">1.2 Softwares de apoio: papel, invocação e resultados</a></li>
+<li class="n2"><a href="#i1-3">1.3 Processamento de uma requisição Web de ponta a ponta</a></li>
+<li class="n2"><a href="#i1-4">1.4 Processamento no navegador</a></li>
+<li class="n2"><a href="#i1-5">1.5 Processamento no servidor web, no servidor de aplicação e no SGBD</a></li>
+<li class="n1"><a href="#secao-2">2 Projeto da arquitetura e desenho detalhado de componentes</a></li>
+<li class="n2"><a href="#i2-1">2.1 Requisitos e escopo da solução</a></li>
+<li class="n2"><a href="#i2-2">2.2 Decisões arquiteturais</a></li>
+<li class="n2"><a href="#i2-3">2.3 Visões de contexto e de contêineres</a></li>
+<li class="n2"><a href="#i2-4">2.4 Visão de componentes</a></li>
+<li class="n2"><a href="#i2-5">2.5 Especificação da interface (API)</a></li>
+<li class="n2"><a href="#i2-6">2.6 Modelo de dados</a></li>
+<li class="n2"><a href="#i2-7">2.7 Desenho detalhado dos componentes</a></li>
+<li class="n2"><a href="#i2-8">2.8 Comportamento dinâmico da autenticação</a></li>
+<li class="n2"><a href="#i2-9">2.9 Implantação e configuração do ambiente operacional</a></li>
+<li class="n2"><a href="#i2-10">2.10 Rastreabilidade entre requisitos, projeto e ambiente</a></li>
+<li class="n1"><a href="#referencias">Referências</a></li>
+<li class="n1"><a href="#apendice-a">Apêndice A – Registro de comunicações e reuniões da equipe</a></li>
+<li class="n1"><a href="#apendice-b">Apêndice B – Gerência de configuração no GitHub</a></li>
+<li class="n1"><a href="#apendice-c">Apêndice C – Planejamento do trabalho e gestão de riscos da equipe</a></li>
+</ul>
+
+<h2 id="lista-figuras" style="margin-top:1.4em">Lista de figuras</h2>
+<ul class="listas"><!--LISTA_FIGURAS--></ul>
+<h2 id="lista-tabelas">Lista de tabelas</h2>
+<ul class="listas"><!--LISTA_TABELAS--></ul>
+
+<!-- ===================================================== PRÉ-TEXTUAIS -->
+<h1 class="nova bm" id="apresentacao">Apresentação e organização do documento</h1>
+<div class="meta" data-item="P.1"></div>
+<p>Este documento é o produto das Atividades Práticas Supervisionadas (APS) da disciplina Domínios de Software. Seu objetivo é projetar uma aplicação Web cujo único propósito é autenticar usuários: receber credenciais, verificar se correspondem a um usuário válido e devolver a identidade desse usuário em caso de sucesso, ou um erro de autenticação em caso de falha. O corpo do documento tem exatamente duas seções, conforme as regras da APS:</p>
+<ul>
+<li>a [[sec:1]] explica o ambiente operacional em que uma aplicação Web executa — navegador, sistema de nomes, pilha de rede e TLS, servidor web, servidor de aplicação e sistema gerenciador de banco de dados (SGBD) —, detalhando como cada software é invocado e que resultados produz;</li>
+<li>a [[sec:2]] apresenta o projeto da arquitetura e o desenho detalhado dos componentes da aplicação de autenticação, apoiado no ambiente descrito na [[sec:1]].</li>
+</ul>
+<p>Cada seção é dividida em <b>itens de informação</b> numerados. No início de cada item há um bloco que identifica sua autoria e sua revisão; a [[tab:tab-autoria]] consolida essas informações. As referências usadas em cada item são citadas no próprio item, no sistema autor-data, e a lista completa encontra-se em [[sec:refs]]. Todas as citações, remissões a itens, figuras e tabelas são <i>links</i> internos, e o sumário e os marcadores do PDF permitem saltar diretamente para qualquer item. Os apêndices reúnem as evidências do trabalho em equipe: registro de comunicações ([[sec:A]]), gerência de configuração ([[sec:B]]) e planejamento e gestão de riscos ([[sec:C]]).</p>
+<p>Para evitar sobreposição de conteúdo, a [[sec:1]] descreve o processamento Web de forma geral, usando como exemplo o carregamento da página de login, enquanto a [[sec:2]] trata exclusivamente da solução para o problema de autenticação. A mesma pilha tecnológica de referência — navegador, Nginx, Apache Tomcat embutido em uma aplicação Spring Boot executando na Java Virtual Machine (JVM) e PostgreSQL — é usada nas duas seções; sua escolha está justificada no [[sec:2.2]].</p>
+
+<h2 class="bm" id="controle-autoria">Controle de autoria e revisão dos itens de informação</h2>
+<p>A [[tab:tab-autoria]] relaciona cada item de informação (artefato) com sua autoria e sua revisão, atendendo à regra 7 da APS: cada integrante atua como autor e como revisor, e ninguém revisa um item de que é autor. A divisão foi feita por unidades lógicas — e não por fatias de texto —, de modo que o autor de um item da [[sec:1]] revise o item correspondente da [[sec:2]] que depende dele, reforçando a consistência entre as seções. A [[tab:tab-resumo]] resume a participação de cada integrante.</p>
+<tab id="tab-autoria" titulo="Artefatos, autoria e revisão" class="compacta">
+<thead><tr><th style="width:8%">Item</th><th>Artefato (item de informação)</th><th style="width:22%">Autoria</th><th style="width:22%">Revisão</th></tr></thead>
+<tbody><!--QUADRO_AUTORIA--></tbody>
+</tab>
+<tab id="tab-resumo" titulo="Resumo da participação individual">
+<thead><tr><th>Integrante</th><th>Itens como autor(a)</th><th>Itens como revisor(a)</th></tr></thead>
+<tbody><!--RESUMO_AUTORIA--></tbody>
+</tab>
+
+<h2 class="bm" id="nota-ia">Nota sobre o uso de inteligência artificial</h2>
+<div class="meta" data-item="P.2"></div>
+<p>Em atendimento ao critério de referências da APS, que considera essencial a citação adequada do uso de inteligência artificial (IA), a equipe declara que utilizou o assistente Claude, modelo Claude Opus 5.5 [[c:anthropic]], em 27 de outubro de 2026. O assistente foi usado para: (a) produzir a versão preliminar do texto de todos os itens de informação, a partir do enunciado da APS; (b) gerar o código-fonte dos diagramas (Graphviz e SVG) e o código de montagem do PDF; e (c) sugerir as fontes bibliográficas, cujas versões vigentes foram consultadas na Web durante a elaboração (por exemplo, a publicação de julho de 2025 da norma NIST SP 800-63B-4 e os parâmetros mínimos de Argon2id recomendados pela OWASP).</p>
+<p>A IA não substitui a responsabilidade dos integrantes: cada item tem um autor, que responde por seu conteúdo e por sua adequação ao escopo, e um revisor, que verifica correção técnica, consistência com os demais itens e conferência das referências citadas ([[tab:tab-autoria]]). As revisões são registradas nos <i>pull requests</i> do repositório ([[sec:B]]). Ideias de terceiros que constam do texto são atribuídas às fontes originais, e não ao assistente, que é citado apenas como ferramenta de apoio à redação e à modelagem.</p>
+
+<!-- ===================================================== SEÇÃO 1 -->
+<h1 class="nova bm" id="secao-1">1 Ambiente operacional de uma aplicação Web</h1>
+<p>Esta seção explica o que acontece, do clique do usuário até a resposta exibida na tela, quando uma aplicação Web é executada. Ela identifica os softwares de apoio — aqueles que não são desenvolvidos pela equipe, mas sem os quais a aplicação não executa —, descreve como cada um é invocado e quais resultados gera. O exemplo condutor é o acesso à página de login da aplicação projetada na [[sec:2]], hospedada no domínio fictício <code>auth.example.com</code>, reservado para documentação.</p>
+
+<h2 class="bm" id="i1-1">1.1 Visão geral do ambiente operacional</h2>
+<div class="meta" data-item="1.1"></div>
+<p>Uma aplicação Web é um software distribuído no estilo cliente-servidor: parte dela executa no navegador do usuário e parte em computadores do provedor, e as partes se comunicam pelo protocolo HTTP sobre a pilha TCP/IP da Internet [[c:kurose;rfc9110]]. O estilo arquitetural REST, que orienta a Web, acrescenta a essa organização restrições como comunicação sem estado entre requisições, interface uniforme baseada em recursos identificados por URI e possibilidade de intermediários, como <i>proxies</i> e <i>caches</i> [[c:fielding2000]].</p>
+<p>O <b>ambiente operacional</b> é o conjunto de softwares de apoio, sistemas operacionais e recursos de rede que hospedam, invocam e transportam a aplicação. No ciclo de vida da ISO/IEC/IEEE 12207, conhecer esse ambiente é pré-requisito dos processos técnicos de definição da arquitetura, implantação (transição) e operação do software [[c:iso12207]]. A [[fig:fig-ambiente]] mostra os elementos do ambiente adotado e as ligações entre eles.</p>
+<fig id="fig-ambiente" src="f1_ambiente.svg" w="11.5cm" titulo="Elementos do ambiente operacional de uma aplicação Web"/>
+<p>Do lado cliente, o <b>navegador</b> é o agente do usuário: interpreta HTML, CSS e JavaScript e executa a parte cliente da aplicação. Ele depende do <b>sistema operacional</b> para abrir conexões de rede e do <b>Sistema de Nomes de Domínio (DNS)</b> para converter o nome do servidor em endereço IP [[c:rfc1034]]. Do lado servidor, distinguem-se dois papéis que frequentemente são confundidos:</p>
+<ul>
+<li>o <b>servidor web</b> (aqui, Nginx) trata o protocolo HTTP na borda do sistema: aceita conexões, negocia o TLS, entrega arquivos estáticos e repassa ao servidor de aplicação as requisições que exigem processamento [[c:nginx]];</li>
+<li>o <b>servidor de aplicação</b> fornece o ambiente de execução para o código da aplicação. Na plataforma Java, esse papel é desempenhado por um contêiner Jakarta Servlet — aqui, o Apache Tomcat —, que gerencia conexões, <i>threads</i> e o ciclo de vida dos componentes da aplicação [[c:jakarta;tomcat]].</li>
+</ul>
+<p>Completam o ambiente a <b>máquina virtual Java</b>, que executa o código compilado; o <i>framework</i> <b>Spring</b>, que organiza a aplicação dentro do contêiner [[c:spring]]; e o <b>SGBD PostgreSQL</b>, que armazena os dados persistentes [[c:postgres]]. O [[sec:1.2]] detalha cada um desses softwares, e os [[sec:1.3]] a [[sec:1.5]] descrevem o processamento que eles realizam em conjunto.</p>
+
+<h2 class="bm" id="i1-2">1.2 Softwares de apoio: papel, invocação e resultados</h2>
+<div class="meta" data-item="1.2"></div>
+<p>A [[tab:tab-softwares]] descreve, para cada software de apoio, seu papel, a forma como é iniciado (quando passa a existir como processo), a forma como é invocado durante o processamento de uma requisição e os resultados que produz. A distinção entre <i>iniciar</i> e <i>invocar</i> é importante: os servidores são iniciados uma vez, normalmente pelo gerenciador de serviços do sistema operacional (<code>systemd</code>), e permanecem à espera de eventos de rede; cada requisição que chega é uma nova invocação de seu código de tratamento [[c:sommerville]].</p>
+<tab id="tab-softwares" titulo="Softwares de apoio do ambiente operacional" class="compacta">
+<thead><tr><th style="width:13%">Software</th><th style="width:19%">Papel</th><th style="width:21%">Como é iniciado</th><th style="width:23%">Como é invocado em execução</th><th>Resultados gerados</th></tr></thead>
+<tbody>
+<tr><td><b>Navegador Web</b> (ex.: Firefox, Chrome)</td><td>Agente do usuário: obtém recursos, interpreta HTML/CSS e executa JavaScript.</td><td>Pelo usuário; o sistema operacional cria o processo principal e processos auxiliares (renderização, rede, GPU).</td><td>Quando o usuário digita uma URL, segue um <i>link</i> ou envia um formulário, ou quando um <i>script</i> chama <code>fetch()</code>.</td><td>Requisições HTTP; página renderizada (DOM) na tela; entradas de <i>cache</i>; mensagens no console em caso de erro.</td></tr>
+<tr><td><b>Resolvedor DNS</b> (local e recursivo)</td><td>Traduz nomes de domínio em endereços IP.</td><td>Serviço do sistema operacional (ex.: <code>systemd-resolved</code>) e servidores recursivos do provedor de acesso.</td><td>Pelo navegador, via chamada <code>getaddrinfo()</code>, quando o nome não está em <i>cache</i>.</td><td>Registros A/AAAA com prazo de validade (TTL) ou erro (ex.: NXDOMAIN).</td></tr>
+<tr><td><b>Sistema operacional</b> (cliente e servidor)</td><td>Gerencia processos, memória, arquivos e a pilha TCP/IP.</td><td>Na inicialização da máquina.</td><td>Por chamadas de sistema: <code>socket</code>, <code>connect</code>, <code>accept</code>, <code>read</code>, <code>write</code>, <code>epoll_wait</code>.</td><td>Conexões TCP estabelecidas, descritores de arquivo, eventos de prontidão de E/S.</td></tr>
+<tr><td><b>Biblioteca TLS</b> (no navegador e OpenSSL no servidor)</td><td>Autentica o servidor por certificado X.509 e cifra o canal.</td><td>Carregada como biblioteca pelo navegador e pelo Nginx.</td><td>No <i>handshake</i> de cada nova conexão e em cada leitura/escrita cifrada.</td><td>Canal cifrado com chaves de sessão; alerta de erro se o certificado for inválido.</td></tr>
+<tr><td><b>Servidor web Nginx</b></td><td>Porta de entrada HTTP(S): termina o TLS, entrega estáticos, atua como <i>proxy</i> reverso, limita taxa e registra acessos.</td><td><code>systemctl start nginx</code>: o processo mestre lê <code>nginx.conf</code>, abre as portas 80 e 443 e cria processos trabalhadores; <code>nginx -s reload</code> recarrega a configuração.</td><td>Por evento de rede: o trabalhador é notificado pelo sistema operacional (<code>epoll</code>) quando chega uma conexão ou dados.</td><td>Respostas HTTP (arquivo ou resposta do servidor de aplicação); códigos de <i>status</i> próprios (301, 404, 413, 429, 502, 504); linhas em <code>access.log</code> e <code>error.log</code>.</td></tr>
+<tr><td><b>JVM</b></td><td>Executa o <i>bytecode</i> Java, com compilação JIT e coleta de lixo.</td><td><code>java -jar autenticacao.jar</code>, executado por uma unidade do <code>systemd</code>.</td><td>Uma única vez; a partir daí executa continuamente as <i>threads</i> da aplicação.</td><td>Processo da aplicação em execução; registros de coleta de lixo e erros fatais.</td></tr>
+<tr><td><b>Servidor de aplicação</b> (Tomcat embutido)</td><td>Contêiner Servlet: aceita requisições do Nginx, aloca <i>threads</i>, aplica filtros e invoca servlets.</td><td>Pelo Spring Boot durante a inicialização da JVM: cria o conector HTTP em 127.0.0.1:8080 e registra o <code>DispatcherServlet</code>.</td><td>A cada requisição: o conector a aceita, uma <i>thread</i> do <i>pool</i> chama <code>Filter.doFilter()</code> e <code>Servlet.service()</code>.</td><td>Objeto de resposta HTTP (status, cabeçalhos, corpo JSON); registros da aplicação.</td></tr>
+<tr><td><b>Spring Framework / Spring Boot</b></td><td>Injeção de dependências, mapeamento de requisições, conversão JSON, validação e acesso a dados.</td><td>Na inicialização, ao criar o contexto da aplicação (<code>ApplicationContext</code>).</td><td>Pelo <code>DispatcherServlet</code>, que localiza e chama o método controlador adequado.</td><td>Chamada do código da aplicação; objetos convertidos de/para JSON; respostas de erro padronizadas.</td></tr>
+<tr><td><b>Driver JDBC e <i>pool</i> de conexões</b> (PostgreSQL JDBC, HikariCP)</td><td>Abrem e reutilizam conexões com o SGBD.</td><td>Na inicialização do contexto, que abre as conexões mínimas do <i>pool</i>.</td><td>Quando um componente de acesso a dados executa uma consulta.</td><td>Conexão emprestada; conjunto de linhas (<code>ResultSet</code>); exceções de acesso a dados.</td></tr>
+<tr><td><b>SGBD PostgreSQL</b></td><td>Armazena e consulta os dados persistentes.</td><td><code>systemctl start postgresql</code>: o processo <code>postmaster</code> passa a escutar a porta 5432.</td><td>A cada nova conexão, cria um processo <i>backend</i> dedicado, que atende as consultas dessa conexão.</td><td>Linhas resultantes, erros SQL e registros no <i>log</i> do servidor.</td></tr>
+</tbody>
+</tab>
+<p>Todos os componentes do lado servidor são processos de longa duração: uma falha em qualquer um deles produz um resultado observável para o cliente. Por exemplo, se a JVM não estiver em execução, o Nginx não consegue conectar-se ao servidor de aplicação e responde <code>502 Bad Gateway</code>; se o servidor de aplicação demorar além do limite configurado, a resposta é <code>504 Gateway Timeout</code> [[c:nginx;rfc9110]].</p>
+
+<h2 class="bm" id="i1-3">1.3 Processamento de uma requisição Web de ponta a ponta</h2>
+<div class="meta" data-item="1.3"></div>
+<p>A [[fig:fig-fluxo]] mostra, em um diagrama de sequência UML [[c:uml]], a colaboração entre os softwares de apoio desde o momento em que o usuário informa o endereço da aplicação até a atualização da tela com o resultado de uma requisição ao servidor de aplicação. Os números das mensagens são usados no texto a seguir.</p>
+<fig id="fig-fluxo" src="f2_fluxo_web.svg" w="16cm" titulo="Sequência de processamento de uma aplicação Web, do navegador ao SGBD"/>
+<h3>a) Resolução de nome (mensagens 1 a 3)</h3>
+<p>O navegador decompõe a URL <code>https://auth.example.com/</code> em esquema (<code>https</code>), nome do servidor (<code>auth.example.com</code>), porta implícita (443) e caminho (<code>/</code>). Se o endereço IP do nome não estiver em <i>cache</i>, o navegador solicita ao sistema operacional a resolução, que consulta o servidor DNS recursivo; este percorre a hierarquia de servidores autoritativos e devolve os registros A (IPv4) ou AAAA (IPv6), com o prazo durante o qual a resposta pode ser reutilizada [[c:rfc1034;kurose]].</p>
+<h3>b) Conexão e segurança do canal (mensagens 4 a 6)</h3>
+<p>Com o endereço IP, o sistema operacional estabelece uma conexão TCP com a porta 443 do servidor pelo <i>handshake</i> de três vias. Em seguida, a biblioteca TLS do navegador inicia o <i>handshake</i> TLS 1.3: a mensagem <i>ClientHello</i> informa o nome do servidor desejado (SNI) e os protocolos de aplicação suportados (ALPN, por exemplo <code>h2</code> para HTTP/2). O Nginx responde com o certificado do domínio, que o navegador valida contra as autoridades certificadoras confiáveis; ao final, ambos derivam chaves simétricas, e todo o tráfego seguinte é cifrado e protegido contra alteração [[c:rfc8446]].</p>
+<h3>c) Requisição HTTP (mensagem 7)</h3>
+<p>O navegador envia uma mensagem de requisição composta por método, alvo, cabeçalhos e, opcionalmente, corpo. A semântica dessas mensagens é a mesma em todas as versões do protocolo [[c:rfc9110]]; o que muda é o enquadramento: em HTTP/1.1 a mensagem é texto [[c:rfc9112]], enquanto em HTTP/2 é dividida em quadros binários multiplexados na mesma conexão [[c:rfc9113]]. A forma textual, mais legível, é:</p>
+<pre>GET / HTTP/1.1
+Host: auth.example.com
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) Firefox/…
+Accept: text/html,application/xhtml+xml
+Accept-Encoding: gzip, br
+Accept-Language: pt-BR,pt;q=0.9</pre>
+<h3>d) Processamento no servidor e resposta (mensagens 8 e 9)</h3>
+<p>O Nginx seleciona o bloco de configuração correspondente ao nome <code>auth.example.com</code> e ao caminho <code>/</code>; como a página de login é um arquivo estático, ele o lê do disco e devolve a resposta sem envolver o servidor de aplicação (detalhes no [[sec:1.5]]). A resposta contém linha de <i>status</i>, cabeçalhos e corpo:</p>
+<pre>HTTP/1.1 200 OK
+Server: nginx
+Date: Tue, 27 Oct 2026 18:30:00 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 1534
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Content-Security-Policy: default-src 'self'; frame-ancestors 'none'
+
+&lt;!doctype html&gt;&lt;html lang="pt-BR"&gt; … &lt;/html&gt;</pre>
+<p>O código de <i>status</i> é o principal resultado da invocação do servidor, e sua classe indica como o cliente deve proceder, como mostra a [[tab:tab-status]]. O cabeçalho <code>Strict-Transport-Security</code> instrui o navegador a usar somente HTTPS nesse domínio durante o prazo indicado [[c:rfc6797]].</p>
+<tab id="tab-status" titulo="Classes de códigos de status HTTP e exemplos usados neste documento" fonte="adaptada de Fielding, Nottingham e Reschke (2022a)">
+<thead><tr><th style="width:12%">Classe</th><th style="width:30%">Significado</th><th>Exemplos relevantes para a aplicação</th></tr></thead>
+<tbody>
+<tr><td>1xx</td><td>Informativa: processamento em andamento.</td><td>Não utilizados pela aplicação.</td></tr>
+<tr><td>2xx</td><td>Sucesso: a requisição foi recebida, entendida e aceita.</td><td><code>200 OK</code> – página entregue ou usuário autenticado.</td></tr>
+<tr><td>3xx</td><td>Redirecionamento: o cliente deve agir em outro local.</td><td><code>301 Moved Permanently</code> – de <code>http://</code> para <code>https://</code>.</td></tr>
+<tr><td>4xx</td><td>Erro do cliente: a requisição tem problema ou não pode ser atendida.</td><td><code>400</code> dados inválidos; <code>401</code> não autenticado; <code>404</code> recurso inexistente; <code>413</code> corpo grande demais; <code>429</code> excesso de requisições.</td></tr>
+<tr><td>5xx</td><td>Erro do servidor: a requisição era válida, mas o servidor falhou.</td><td><code>500</code> erro interno; <code>502</code> servidor de aplicação inacessível; <code>503</code> serviço indisponível; <code>504</code> tempo esgotado.</td></tr>
+</tbody>
+</tab>
+<h3>e) Renderização e interação (mensagens 10 a 19)</h3>
+<p>Ao receber o HTML, o navegador constrói e exibe a página, buscando com novas requisições os recursos referenciados, como folhas de estilo e <i>scripts</i> ([[sec:1.4]]). Quando o usuário aciona o botão de envio, o código JavaScript da página envia ao mesmo servidor uma requisição <code>POST</code> com corpo JSON. Dessa vez o Nginx não encontra um arquivo a entregar: a configuração determina que caminhos iniciados por <code>/api/</code> sejam repassados ao servidor de aplicação, que executa o código da aplicação, consulta o SGBD e produz a resposta. O Nginx devolve essa resposta ao navegador, registra o acesso, e o JavaScript atualiza a página sem recarregá-la. O contrato exato dessa requisição pertence à solução de autenticação e está especificado no [[sec:2.5]].</p>
+
+<h2 class="bm" id="i1-4">1.4 Processamento no navegador</h2>
+<div class="meta" data-item="1.4"></div>
+<p>O navegador é, ao mesmo tempo, cliente HTTP e ambiente de execução da parte cliente da aplicação. Seu processamento é descrito pelas especificações HTML e Fetch, mantidas pelo WHATWG [[c:whatwg_html;whatwg_fetch]], e está resumido na [[fig:fig-navegador]].</p>
+<fig id="fig-navegador" src="f3_navegador.svg" w="16cm" titulo="Fluxo de processamento de uma resposta HTML no navegador" fonte="elaborada pelos autores com base em Grigorik (2013) e WHATWG (2026a)"/>
+<p><b>Construção da página.</b> Os <i>bytes</i> recebidos são decodificados segundo o <code>charset</code> do cabeçalho <code>Content-Type</code> e entregues ao analisador HTML, que produz incrementalmente o DOM (<i>Document Object Model</i>), a árvore de objetos que representa o documento. Ao encontrar <code>&lt;link rel="stylesheet"&gt;</code> ou <code>&lt;script src&gt;</code>, o navegador dispara novas requisições, reutilizando a conexão já aberta. O CSS é transformado no CSSOM; DOM e CSSOM são combinados na árvore de renderização, que contém apenas os elementos visíveis com seus estilos calculados. Seguem as etapas de <i>layout</i> (cálculo de posição e tamanho de cada caixa), pintura (geração dos <i>pixels</i>) e composição das camadas na tela [[c:grigorik]].</p>
+<p><b>Execução de JavaScript.</b> O motor JavaScript executa os <i>scripts</i> da página em uma única <i>thread</i> principal, regida pelo laço de eventos (<i>event loop</i>): eventos do usuário, como o envio de um formulário, e conclusões de operações de rede são enfileirados como tarefas e processados um de cada vez. Um tratador de eventos pode ler e alterar o DOM; cada alteração provoca novo cálculo de estilo, <i>layout</i> e pintura da parte afetada [[c:whatwg_html]].</p>
+<p><b>Requisições assíncronas.</b> A função <code>fetch()</code> envia requisições HTTP sem recarregar a página e devolve uma <i>Promise</i>, resolvida quando a resposta chega; o código decide então o que exibir conforme o código de <i>status</i> e o corpo recebido [[c:whatwg_fetch]]. Esse é o mecanismo usado pela página de login para enviar as credenciais e tratar o resultado ([[sec:2.4]]).</p>
+<p><b>Políticas de segurança aplicadas pelo navegador.</b> A política de mesma origem (<i>same-origin policy</i>) impede que um <i>script</i> leia respostas de origens diferentes da sua, salvo autorização explícita do servidor pelo mecanismo CORS. Como a página e a API de autenticação são servidas pela mesma origem, <code>https://auth.example.com</code>, não é necessário habilitar CORS — uma decisão registrada no [[sec:2.2]]. O navegador também aplica a política de conteúdo (<code>Content-Security-Policy</code>), que restringe de onde podem ser carregados <i>scripts</i> e estilos, e a política HSTS recebida na resposta [[c:whatwg_fetch;rfc6797]].</p>
+<p><b>Resultados.</b> O processamento no navegador produz a página exibida ao usuário, novas requisições HTTP (para recursos e para a API), alterações no DOM em resposta às interações e, em caso de falhas, mensagens no console de desenvolvimento e páginas de erro do próprio navegador, como a de certificado inválido.</p>
+
+<h2 class="bm" id="i1-5">1.5 Processamento no servidor web, no servidor de aplicação e no SGBD</h2>
+<div class="meta" data-item="1.5"></div>
+<p>A [[fig:fig-servidor]] detalha a estrutura interna dos três softwares do lado servidor e o caminho percorrido por uma requisição dirigida à API. A configuração concreta desses softwares para a aplicação de autenticação é apresentada no [[sec:2.9]].</p>
+<fig id="fig-servidor" src="f4_servidor.svg" w="10.5cm" titulo="Estrutura interna do servidor web, do servidor de aplicação e do SGBD" fonte="elaborada pelos autores com base em NGINX (2026), Apache Software Foundation (2026), SPRING (2026) e PostgreSQL Global Development Group (2026)"/>
+<h3>a) Servidor web (Nginx)</h3>
+<p>O Nginx adota uma arquitetura orientada a eventos. O processo mestre, executado com privilégios administrativos, lê a configuração, abre as portas e cria processos trabalhadores sem privilégios, normalmente um por núcleo de processador. Cada trabalhador executa um laço de eventos não bloqueante que atende milhares de conexões simultâneas: em vez de dedicar uma <i>thread</i> a cada conexão, ele pede ao sistema operacional (via <code>epoll</code>) que o avise quando há dados a ler ou espaço para escrever [[c:nginx]]. Para cada requisição, o trabalhador:</p>
+<ol>
+<li>conclui o <i>handshake</i> TLS e lê a linha de requisição e os cabeçalhos;</li>
+<li>escolhe o bloco <code>server</code> pelo nome do servidor (SNI/<code>Host</code>) e, dentro dele, o bloco <code>location</code> que melhor corresponde ao caminho;</li>
+<li>executa as fases de processamento configuradas, como limitação de taxa e restrição de tamanho do corpo, que podem encerrar a requisição com <code>429</code> ou <code>413</code>;</li>
+<li>gera o conteúdo: lê um arquivo estático e o envia, ou, no caso de um <code>location</code> com <code>proxy_pass</code>, abre uma conexão HTTP com o servidor de aplicação, repassa a requisição acrescentando os cabeçalhos <code>X-Forwarded-For</code> e <code>X-Forwarded-Proto</code> (endereço do cliente e protocolo original) e aguarda a resposta dentro dos limites de tempo configurados;</li>
+<li>devolve a resposta ao cliente e grava uma linha no <i>log</i> de acesso com endereço do cliente, data, requisição, <i>status</i>, tamanho e tempo de resposta.</li>
+</ol>
+<h3>b) Servidor de aplicação (Tomcat com Spring)</h3>
+<p>No Tomcat, o <b>conector HTTP</b> aceita a conexão vinda do Nginx e, com um seletor não bloqueante, detecta quando há uma requisição completa; nesse momento entrega o processamento a uma <i>thread</i> de um <i>pool</i> de tamanho limitado, que atenderá essa requisição do início ao fim. A <i>thread</i> analisa a mensagem, cria os objetos <code>HttpServletRequest</code> e <code>HttpServletResponse</code> e os conduz pela cadeia de filtros (<code>Filter</code>) até o servlet mapeado para o caminho [[c:tomcat]]. O contêiner é responsável pelo ciclo de vida dos servlets — criação e inicialização (<code>init</code>), atendimento de requisições (<code>service</code>) e destruição (<code>destroy</code>) — e pela execução concorrente de requisições [[c:jakarta]].</p>
+<p>Na aplicação Spring, há um único servlet, o <code>DispatcherServlet</code>, que implementa o padrão <i>Front Controller</i> [[c:fowler]]: ele consulta os mapeamentos para descobrir qual método controlador atende ao método HTTP e ao caminho recebidos, converte o corpo JSON em objeto Java por meio de um conversor de mensagens, aplica as validações declaradas, invoca o controlador e converte o valor devolvido de volta para JSON. Exceções lançadas pelo código da aplicação são capturadas por tratadores de exceção, que as transformam em respostas de erro [[c:spring]].</p>
+<h3>c) Acesso ao SGBD (PostgreSQL)</h3>
+<p>Quando o código da aplicação precisa de dados, pede uma conexão ao <i>pool</i>, que entrega uma conexão já aberta e autenticada, evitando o custo de estabelecer uma nova a cada requisição. O driver JDBC envia a consulta parametrizada pelo protocolo do PostgreSQL. No servidor, o processo <code>postmaster</code> criou, no momento da conexão, um processo <i>backend</i> dedicado, que agora analisa o comando SQL, reescreve-o, escolhe um plano de execução — por exemplo, a busca por um índice — e o executa, devolvendo as linhas encontradas [[c:postgres]]. Terminada a consulta, a conexão volta ao <i>pool</i>, e a resposta percorre o caminho inverso: controlador, conversor JSON, Tomcat, Nginx e navegador.</p>
+<p>Os resultados observáveis desse processamento são a resposta HTTP entregue ao cliente e os registros de cada camada — <i>log</i> de acesso do Nginx, <i>log</i> da aplicação e <i>log</i> do SGBD —, que permitem reconstruir o que ocorreu com cada requisição.</p>
+
+<!-- ===================================================== SEÇÃO 2 -->
+<h1 class="nova bm" id="secao-2">2 Projeto da arquitetura e desenho detalhado de componentes</h1>
+<p>Esta seção corresponde aos processos técnicos de definição da arquitetura e de definição do desenho do ciclo de vida da ISO/IEC/IEEE 12207 [[c:iso12207]]. A arquitetura é descrita por um conjunto de visões complementares, porque nenhuma estrutura isolada representa todas as propriedades relevantes de um sistema [[c:bass]]: visões de contexto, contêineres e componentes, segundo o modelo C4 [[c:c4]], e diagramas UML de classes, sequência, atividades e implantação para o desenho detalhado [[c:uml]]. O ponto de partida são os requisitos derivados do escopo da APS ([[sec:2.1]]) e o ponto de chegada é a rastreabilidade entre requisitos, elementos de projeto e ambiente operacional ([[sec:2.10]]).</p>
+
+<h2 class="bm" id="i2-1">2.1 Requisitos e escopo da solução</h2>
+<div class="meta" data-item="2.1"></div>
+<p>O escopo definido no Apêndice A do enunciado da APS restringe a aplicação à verificação de credenciais: ela recebe as credenciais, verifica a existência do usuário, compara a credencial fornecida com a registrada e decide se o usuário está ou não autenticado. Os requisitos funcionais derivados desse escopo estão na [[tab:tab-rf]]; os requisitos não funcionais, classificados segundo o modelo de qualidade da ISO/IEC 25010 [[c:iso25010]], estão na [[tab:tab-rnf]].</p>
+<tab id="tab-rf" titulo="Requisitos funcionais">
+<thead><tr><th style="width:9%">Id.</th><th>Requisito</th><th style="width:23%">Origem no escopo</th></tr></thead>
+<tbody>
+<tr><td>RF01</td><td>Receber credenciais enviadas pelo cliente, compostas por um identificador (nome de usuário ou e-mail) e uma senha.</td><td>Entrada de credenciais</td></tr>
+<tr><td>RF02</td><td>Rejeitar requisições com credenciais ausentes, vazias ou fora dos limites de tamanho, sem consultar o repositório.</td><td>Entrada de credenciais</td></tr>
+<tr><td>RF03</td><td>Verificar a existência do usuário no repositório de dados, buscando pelo nome de usuário ou pelo e-mail, sem distinção entre maiúsculas e minúsculas.</td><td>Validação das credenciais</td></tr>
+<tr><td>RF04</td><td>Comparar a senha fornecida com a credencial registrada, que é um <i>hash</i> de senha.</td><td>Comparação da credencial</td></tr>
+<tr><td>RF05</td><td>Decidir entre <i>autenticado</i> (usuário existe e senha confere) e <i>não autenticado</i> (usuário inexistente ou senha incorreta).</td><td>Decisão de autenticação</td></tr>
+<tr><td>RF06</td><td>Em caso de sucesso, retornar um objeto com a identificação do usuário (identificador único, nome de usuário, e-mail, nome de exibição e instante da autenticação).</td><td>Retorno em caso de sucesso</td></tr>
+<tr><td>RF07</td><td>Em caso de falha, retornar um erro de autenticação que não revele qual das condições falhou.</td><td>Retorno em caso de falha</td></tr>
+</tbody>
+</tab>
+<tab id="tab-rnf" titulo="Requisitos não funcionais" class="compacta">
+<thead><tr><th style="width:8%">Id.</th><th style="width:20%">Característica (ISO/IEC 25010)</th><th>Requisito</th></tr></thead>
+<tbody>
+<tr><td>RNF01</td><td>Segurança – confidencialidade</td><td>Credenciais trafegam somente por HTTPS (TLS 1.2 ou 1.3); requisições HTTP são redirecionadas e o navegador é instruído por HSTS a não usar HTTP [[c:rfc8446;rfc6797]].</td></tr>
+<tr><td>RNF02</td><td>Segurança – confidencialidade</td><td>Senhas nunca são armazenadas nem comparadas em claro: o repositório guarda <i>hashes</i> Argon2id com sal único por usuário e parâmetros mínimos de 19 MiB de memória, 2 iterações e paralelismo 1 [[c:owasp_pwd;rfc9106]].</td></tr>
+<tr><td>RNF03</td><td>Segurança – confidencialidade</td><td>Não enumeração de usuários: usuário inexistente e senha incorreta produzem a mesma resposta (status e corpo) e tempo de processamento semelhante [[c:owasp_auth]].</td></tr>
+<tr><td>RNF04</td><td>Segurança – resistência</td><td>Limitação da taxa de tentativas por endereço IP, para conter ataques de força bruta e adivinhação em massa [[c:nist]].</td></tr>
+<tr><td>RNF05</td><td>Segurança – responsabilização</td><td>Cada tentativa gera um registro de evento com resultado e identificador mascarado; a senha nunca aparece em registros ou mensagens de erro [[c:owasp_auth]].</td></tr>
+<tr><td>RNF06</td><td>Segurança – integridade</td><td>Privilégio mínimo: a aplicação acessa o banco com papel somente de leitura; servidor de aplicação e SGBD não são acessíveis diretamente pela Internet.</td></tr>
+<tr><td>RNF07</td><td>Eficiência de desempenho</td><td>Meta de projeto: 95% das autenticações respondidas em até 1 s com carga de 20 autenticações por segundo em um nó, com consumo de memória limitado.</td></tr>
+<tr><td>RNF08</td><td>Flexibilidade – escalabilidade</td><td>A API não mantém estado entre requisições, permitindo replicar instâncias atrás do servidor web.</td></tr>
+<tr><td>RNF09</td><td>Usabilidade e compatibilidade</td><td>Aceitar senhas com caracteres Unicode, normalizadas antes da verificação, permitir colar a senha e uso de gerenciadores de senhas [[c:nist]].</td></tr>
+<tr><td>RNF10</td><td>Manutenibilidade – modularidade</td><td>As regras de autenticação independem de <i>framework</i>, servidor e SGBD, que são substituíveis por adaptadores [[c:martin]].</td></tr>
+</tbody>
+</tab>
+<p><b>Fora do escopo.</b> Por determinação do enunciado (“somente verificação de credenciais, nada além disso”), não fazem parte da solução: cadastro de usuários e definição de senhas, alteração e recuperação de senha, emissão de sessões, <i>cookies</i> ou <i>tokens</i>, autorização (controle de acesso a recursos), autenticação multifator, federação de identidade e bloqueio de contas. O repositório de usuários é considerado previamente populado por outro processo, que grava os <i>hashes</i> no formato definido no [[sec:2.6]].</p>
+<p class="destaque"><b>Limitação reconhecida.</b> A norma NIST SP 800-63B-4 exige que o verificador limite o número de tentativas malsucedidas por conta [[c:nist]]. Esse controle requer manter contadores por usuário, o que implica gravar estado e ultrapassa o escopo de “somente verificação”. Na solução, a limitação é feita por endereço IP na borda (RNF04, [[sec:2.9]]); a limitação por conta é recomendada como evolução, em componente separado.</p>
+
+<h2 class="bm" id="i2-2">2.2 Decisões arquiteturais</h2>
+<div class="meta" data-item="2.2"></div>
+<p>A [[tab:tab-decisoes]] registra as principais decisões arquiteturais, as alternativas consideradas e os requisitos que motivaram cada escolha. O registro explícito das decisões e de suas justificativas facilita a avaliação da arquitetura e sua evolução [[c:bass;pressman]].</p>
+<tab id="tab-decisoes" titulo="Decisões arquiteturais" class="compacta">
+<thead><tr><th style="width:6%">Id.</th><th style="width:22%">Decisão</th><th style="width:20%">Alternativas consideradas</th><th>Justificativa</th><th style="width:10%">Requisitos</th></tr></thead>
+<tbody>
+<tr><td>DA01</td><td>Cliente-servidor com página estática e API REST/JSON (<code>POST /api/v1/autenticacoes</code>).</td><td>Formulário HTML tradicional com página gerada no servidor.</td><td>Separa apresentação e verificação; a API pode ser usada por outros clientes; segue as restrições REST de interface uniforme e ausência de estado [[c:fielding2000]].</td><td>RF01, RF06, RNF08</td></tr>
+<tr><td>DA02</td><td>Página e API servidas pela mesma origem, atrás do Nginx.</td><td>API em subdomínio próprio com CORS.</td><td>Dispensa CORS, reduz a superfície de ataque e simplifica a política de conteúdo ([[sec:1.4]]).</td><td>RNF01</td></tr>
+<tr><td>DA03</td><td>Nginx como servidor web e <i>proxy</i> reverso; Tomcat embutido no Spring Boot como servidor de aplicação.</td><td>Apache httpd; servidor Jakarta EE completo (ex.: WildFly).</td><td>A aplicação só precisa de um contêiner Servlet; o Nginx concentra TLS, estáticos e limitação de taxa com baixo consumo de recursos [[c:nginx;tomcat]].</td><td>RNF01, RNF04, RNF07</td></tr>
+<tr><td>DA04</td><td>Java com Spring Boot no servidor de aplicação.</td><td>Node.js; Python.</td><td>Ecossistema maduro para validação, tratamento de erros padronizado e acesso a dados; disponibilidade de implementação de Argon2id [[c:spring]].</td><td>RF02, RF07</td></tr>
+<tr><td>DA05</td><td>PostgreSQL como repositório de usuários.</td><td>Diretório LDAP; banco NoSQL.</td><td>Restrições de unicidade, índices e controle fino de privilégios por coluna [[c:postgres]].</td><td>RF03, RNF06</td></tr>
+<tr><td>DA06</td><td>Verificação de senha com Argon2id.</td><td>bcrypt; PBKDF2.</td><td>Função de custo elevado em memória, resistente a ataques com GPU; primeira recomendação da OWASP [[c:rfc9106;owasp_pwd]].</td><td>RF04, RNF02</td></tr>
+<tr><td>DA07</td><td>Resposta de falha única e verificação contra <i>hash</i> fictício quando o usuário não existe.</td><td>Mensagens distintas para “usuário inexistente” e “senha incorreta”.</td><td>Evita a enumeração de usuários pelo conteúdo e pelo tempo da resposta [[c:owasp_auth]].</td><td>RF07, RNF03</td></tr>
+<tr><td>DA08</td><td>API sem estado e sem emissão de sessão ou <i>token</i>; a identidade é devolvida no corpo da resposta.</td><td>Sessão com <i>cookie</i>; <i>token</i> JWT.</td><td>Atende ao escopo, que exige apenas a identificação do usuário para que o cliente continue o fluxo.</td><td>RF06, RNF08</td></tr>
+<tr><td>DA09</td><td>Erros no formato <i>Problem Details</i> (<code>application/problem+json</code>).</td><td>Formato de erro próprio.</td><td>Formato padronizado e legível por máquina [[c:rfc9457]].</td><td>RF02, RF07</td></tr>
+<tr><td>DA10</td><td>Servidor organizado em camadas, com núcleo isolado por portas (interfaces) e adaptadores.</td><td>Controlador acessando o banco diretamente.</td><td>Dependências apontam para o núcleo, que pode ser testado sem servidor nem banco [[c:martin]].</td><td>RNF10</td></tr>
+</tbody>
+</tab>
+
+<h2 class="bm" id="i2-3">2.3 Visões de contexto e de contêineres</h2>
+<div class="meta" data-item="2.3"></div>
+<p>A visão de contexto ([[fig:fig-contexto]]) delimita o sistema e mostra com quem ele interage [[c:c4]]. O <b>usuário</b> envia identificador e senha; o sistema devolve a identidade, que será usada por um <b>fluxo cliente subsequente</b>, fora do escopo. O <b>processo de cadastro</b>, também externo, é quem popula o repositório com os usuários e seus <i>hashes</i> de senha.</p>
+<fig id="fig-contexto" src="f5_contexto.svg" w="10cm" titulo="Visão de contexto do Sistema Web de Autenticação (C4, nível 1)"/>
+<p>A visão de contêineres ([[fig:fig-conteineres]]) decompõe o sistema em unidades executáveis ou de armazenamento independentes [[c:c4]]. Cada contêiner corresponde a um elemento do ambiente operacional descrito na [[sec:1]]:</p>
+<ul>
+<li><b>Página de login</b>: HTML, CSS e JavaScript executados pelo navegador ([[sec:1.4]]); coleta as credenciais e apresenta o resultado;</li>
+<li><b>Servidor Web</b>: Nginx ([[sec:1.5]]); termina o TLS, entrega a página, limita a taxa de tentativas e encaminha <code>/api/</code> à API;</li>
+<li><b>API de Autenticação</b>: aplicação Spring Boot com Tomcat embutido, na JVM ([[sec:1.5]]); verifica as credenciais e devolve a identidade;</li>
+<li><b>Repositório de Usuários</b>: banco PostgreSQL com a tabela <code>usuario</code> ([[sec:2.6]]).</li>
+</ul>
+<fig id="fig-conteineres" src="f6_conteineres.svg" w="7.2cm" titulo="Visão de contêineres do Sistema Web de Autenticação (C4, nível 2)"/>
+
+<h2 class="bm" id="i2-4">2.4 Visão de componentes</h2>
+<div class="meta" data-item="2.4"></div>
+<p>A [[fig:fig-componentes]] apresenta os componentes da página de login e da API, organizados em camadas. No servidor, a regra de dependência é respeitada: as camadas externas dependem do núcleo, nunca o contrário. O núcleo declara <b>portas</b> — interfaces que expressam o que ele precisa do mundo externo — e a camada de infraestrutura fornece <b>adaptadores</b> que as implementam, aplicando o princípio da inversão de dependência [[c:martin]]. O repositório segue o padrão <i>Repository</i>, que expõe ao domínio uma interface semelhante a uma coleção de objetos e esconde o SQL [[c:fowler]].</p>
+<fig id="fig-componentes" src="f7_componentes.svg" w="16cm" titulo="Visão de componentes da página de login e da API de Autenticação"/>
+<p>A [[tab:tab-componentes]] descreve a responsabilidade de cada componente e onde ele executa. O desenho interno das classes da API está no [[sec:2.7]].</p>
+<tab id="tab-componentes" titulo="Componentes, responsabilidades e local de execução" class="compacta">
+<thead><tr><th style="width:24%">Componente</th><th style="width:15%">Camada</th><th>Responsabilidade</th><th style="width:15%">Executa em</th></tr></thead>
+<tbody>
+<tr><td>PaginaLogin (<code>index.html</code>, <code>login.css</code>)</td><td>Apresentação</td><td>Formulário com campos <code>identificador</code> (<code>autocomplete="username"</code>) e <code>senha</code> (<code>autocomplete="current-password"</code>, colar permitido, opção de exibir a senha), botão Entrar e área de mensagens acessível (<code>aria-live</code>).</td><td>Navegador</td></tr>
+<tr><td>ControladorLogin (<code>login.js</code>)</td><td>Apresentação</td><td>Trata o evento de envio, impede o envio padrão do formulário, desabilita o botão durante a requisição, exibe o resultado e, no sucesso, publica a identidade para o fluxo cliente subsequente.</td><td>Navegador</td></tr>
+<tr><td>ClienteApiAutenticacao (<code>api.js</code>)</td><td>Apresentação</td><td>Envia <code>POST</code> com corpo JSON via <code>fetch()</code>, aplica tempo limite e traduz o código de <i>status</i> em resultado (autenticado, não autenticado ou erro).</td><td>Navegador</td></tr>
+<tr><td>AutenticacaoController</td><td>Interface da API</td><td>Recebe a requisição HTTP, dispara a validação do corpo, chama o serviço e monta a resposta 200.</td><td>Servidor de aplicação</td></tr>
+<tr><td>ManipuladorErrosApi</td><td>Interface da API</td><td>Converte exceções em respostas <i>Problem Details</i> (400, 401, 503, 500), sem expor detalhes internos.</td><td>Servidor de aplicação</td></tr>
+<tr><td>DTOs (SolicitacaoAutenticacao, IdentidadeUsuarioResposta)</td><td>Interface da API</td><td>Representam os corpos JSON de entrada e saída e suas regras de validação.</td><td>Servidor de aplicação</td></tr>
+<tr><td>ServicoAutenticacao</td><td>Aplicação</td><td>Coordena o caso de uso: normaliza credenciais, busca o usuário, verifica a senha, decide, registra o evento e devolve a identidade ou lança a falha.</td><td>Servidor de aplicação</td></tr>
+<tr><td>Domínio (Credenciais, Usuario, IdentidadeUsuario, FalhaAutenticacaoException)</td><td>Domínio</td><td>Conceitos do problema de autenticação, sem dependência de tecnologia.</td><td>Servidor de aplicação</td></tr>
+<tr><td>Portas (RepositorioUsuarios, VerificadorSenha, RegistradorEventos)</td><td>Domínio</td><td>Interfaces das quais o serviço depende.</td><td>Servidor de aplicação</td></tr>
+<tr><td>RepositorioUsuariosJdbc</td><td>Infraestrutura</td><td>Consulta a tabela <code>usuario</code> com SQL parametrizado.</td><td>Servidor de aplicação → SGBD</td></tr>
+<tr><td>VerificadorSenhaArgon2id</td><td>Infraestrutura</td><td>Verifica a senha contra o <i>hash</i> Argon2id e fornece o <i>hash</i> fictício.</td><td>Servidor de aplicação</td></tr>
+<tr><td>RegistradorEventosLog</td><td>Infraestrutura</td><td>Grava eventos de autenticação estruturados no <i>log</i> da aplicação.</td><td>Servidor de aplicação</td></tr>
+</tbody>
+</tab>
+
+<h2 class="bm" id="i2-5">2.5 Especificação da interface (API)</h2>
+<div class="meta" data-item="2.5"></div>
+<p>A API expõe um único recurso. O método <code>POST</code> foi escolhido porque as credenciais devem trafegar no corpo da mensagem — nunca na URL, que fica registrada em <i>logs</i> e no histórico do navegador — e porque a operação não é segura nem idempotente no sentido HTTP [[c:rfc9110]]. Como nenhum recurso persistente é criado, o sucesso é indicado por <code>200 OK</code>, e não por <code>201 Created</code>. A [[tab:tab-api]] resume o contrato e a [[tab:tab-campos]] define os campos da requisição, codificados em JSON [[c:rfc8259]].</p>
+<tab id="tab-api" titulo="Contrato do recurso de autenticação">
+<thead><tr><th style="width:26%">Elemento</th><th>Especificação</th></tr></thead>
+<tbody>
+<tr><td>Recurso e método</td><td><code>POST /api/v1/autenticacoes</code> (versão na URL para permitir evolução compatível)</td></tr>
+<tr><td>Cabeçalhos de requisição</td><td><code>Content-Type: application/json</code>; <code>Accept: application/json</code></td></tr>
+<tr><td>Tamanho máximo do corpo</td><td>4 KiB (verificado pelo Nginx)</td></tr>
+<tr><td>Respostas</td><td><code>application/json</code> no sucesso; <code>application/problem+json</code> nos erros [[c:rfc9457]]; sempre com <code>Cache-Control: no-store</code></td></tr>
+</tbody>
+</tab>
+<tab id="tab-campos" titulo="Campos do corpo da requisição">
+<thead><tr><th style="width:18%">Campo</th><th style="width:10%">Tipo</th><th style="width:13%">Obrigatório</th><th>Restrições</th></tr></thead>
+<tbody>
+<tr><td><code>identificador</code></td><td>texto</td><td>sim</td><td>Nome de usuário ou e-mail; não vazio após remoção de espaços nas extremidades; no máximo 254 caracteres. Se contém “@”, é tratado como e-mail; caso contrário, como nome de usuário.</td></tr>
+<tr><td><code>senha</code></td><td>texto</td><td>sim</td><td>Não vazia; no máximo 256 unidades UTF-16 (limite de proteção contra corpos abusivos, suficiente para 128 caracteres Unicode quaisquer). Nenhuma regra de composição é aplicada na verificação.</td></tr>
+</tbody>
+</tab>
+<p>Exemplo de requisição e de resposta de sucesso:</p>
+<pre>POST /api/v1/autenticacoes HTTP/1.1
+Host: auth.example.com
+Content-Type: application/json
+Accept: application/json
+
+{"identificador": "maria.silva", "senha": "correto cavalo bateria grampo"}
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+
+{"id": "3f2b7c1e-8d4a-4c0e-9a51-6e2f0b9d7a10", "login": "maria.silva",
+ "email": "maria.silva@example.com", "nomeExibicao": "Maria Silva",
+ "autenticadoEm": "2026-10-27T18:30:00Z"}</pre>
+<p>Exemplo de resposta de falha de autenticação, idêntica para usuário inexistente e senha incorreta (RNF03). Como a especificação HTTP exige que toda resposta <code>401</code> traga o cabeçalho <code>WWW-Authenticate</code> [[c:rfc9110]], define-se o esquema próprio <code>CredenciaisJson</code>, que indica ao cliente que as credenciais devem ser enviadas no corpo JSON deste recurso:</p>
+<pre>HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+Cache-Control: no-store
+WWW-Authenticate: CredenciaisJson realm="auth.example.com"
+
+{"type": "https://auth.example.com/problemas/credenciais-invalidas",
+ "title": "Falha de autenticação", "status": 401,
+ "detail": "Identificador ou senha inválidos."}</pre>
+<p>A [[tab:tab-respostas]] lista todas as respostas possíveis, indicando qual software do ambiente operacional as produz.</p>
+<tab id="tab-respostas" titulo="Respostas da API e software que as produz" class="compacta">
+<thead><tr><th style="width:21%">Status</th><th>Situação</th><th style="width:30%">Corpo e cabeçalhos</th><th style="width:15%">Produzida por</th></tr></thead>
+<tbody>
+<tr><td><code>200 OK</code></td><td>Usuário existe e a senha confere (RF05, RF06).</td><td>Objeto de identidade.</td><td>API (Tomcat/Spring)</td></tr>
+<tr><td><code>400 Bad Request</code></td><td>JSON malformado ou campo ausente, vazio ou longo demais (RF02).</td><td><i>Problem Details</i> com a lista de campos inválidos, sem ecoar os valores recebidos.</td><td>API</td></tr>
+<tr><td><code>401 Unauthorized</code></td><td>Usuário inexistente ou senha incorreta (RF05, RF07).</td><td><i>Problem Details</i> genérico; <code>WWW-Authenticate</code>.</td><td>API</td></tr>
+<tr><td><code>405 Method Not Allowed</code></td><td>Método diferente de <code>POST</code>.</td><td><code>Allow: POST</code>.</td><td>API</td></tr>
+<tr><td><code>413 Content Too Large</code></td><td>Corpo maior que 4 KiB.</td><td>Página de erro do servidor web.</td><td>Nginx</td></tr>
+<tr><td><code>415 Unsupported Media Type</code></td><td>Corpo que não é JSON.</td><td><i>Problem Details</i>.</td><td>API</td></tr>
+<tr><td><code>429 Too Many Requests</code></td><td>Limite de taxa por endereço IP excedido (RNF04).</td><td>Página de erro do servidor web.</td><td>Nginx</td></tr>
+<tr><td><code>500 Internal Server Error</code></td><td>Falha inesperada na aplicação.</td><td><i>Problem Details</i> genérico, sem rastreamento de pilha.</td><td>API</td></tr>
+<tr><td><code>502</code> / <code>504</code></td><td>API inacessível ou sem resposta no tempo limite.</td><td>Página de erro do servidor web.</td><td>Nginx</td></tr>
+<tr><td><code>503 Service Unavailable</code></td><td>Repositório de usuários indisponível.</td><td><i>Problem Details</i>.</td><td>API</td></tr>
+</tbody>
+</tab>
+
+<h2 class="bm" id="i2-6">2.6 Modelo de dados</h2>
+<div class="meta" data-item="2.6"></div>
+<p>O repositório contém uma única tabela, <code>usuario</code> ([[fig:fig-dados]]), com apenas os dados necessários para verificar credenciais e montar o objeto de identidade. O identificador primário é um UUID, que não revela a quantidade nem a ordem de cadastro dos usuários.</p>
+<fig id="fig-dados" src="f8_dados.svg" w="6.5cm" titulo="Modelo físico da tabela de usuários"/>
+<p>Restrições e índices garantem as premissas de que o projeto depende: unicidade de <code>login</code> e de <code>email</code> (cujas restrições criam os índices usados pela busca); armazenamento normalizado em minúsculas, que torna a busca insensível a maiúsculas; proibição de “@” no nome de usuário, que torna inequívoca a interpretação do identificador ([[tab:tab-campos]]); e formato Argon2id obrigatório para o <i>hash</i>. O papel de banco usado pela aplicação recebe apenas permissão de leitura nas colunas necessárias (RNF06) [[c:postgres]]:</p>
+<pre>CREATE TABLE usuario (
+  id             UUID          PRIMARY KEY,
+  login          VARCHAR(64)   NOT NULL,
+  email          VARCHAR(254)  NOT NULL,
+  nome_exibicao  VARCHAR(120)  NOT NULL,
+  hash_senha     VARCHAR(255)  NOT NULL,
+  criado_em      TIMESTAMPTZ   NOT NULL DEFAULT now(),
+  atualizado_em  TIMESTAMPTZ   NOT NULL DEFAULT now(),
+  CONSTRAINT uk_usuario_login   UNIQUE (login),
+  CONSTRAINT uk_usuario_email   UNIQUE (email),
+  CONSTRAINT ck_login_normal    CHECK (login = lower(login) AND position('@' IN login) = 0),
+  CONSTRAINT ck_email_normal    CHECK (email = lower(email)),
+  CONSTRAINT ck_hash_argon2id   CHECK (hash_senha LIKE '$argon2id$%')
+);
+CREATE ROLE app_autenticacao LOGIN;   -- senha definida fora do repositório
+GRANT SELECT (id, login, email, nome_exibicao, hash_senha) ON usuario TO app_autenticacao;</pre>
+<p>A coluna <code>hash_senha</code> armazena a cadeia no formato PHC, que reúne algoritmo, versão, parâmetros, sal e <i>hash</i>, por exemplo <code>$argon2id$v=19$m=19456,t=2,p=1$&lt;sal&gt;$&lt;hash&gt;</code>. Como os parâmetros ficam junto de cada <i>hash</i>, o custo pode ser elevado no futuro sem invalidar os registros existentes [[c:rfc9106;owasp_pwd]].</p>
+
+<h2 class="bm" id="i2-7">2.7 Desenho detalhado dos componentes</h2>
+<div class="meta" data-item="2.7"></div>
+<p>O desenho detalhado da API é apresentado em dois diagramas de classes UML [[c:uml]]: a [[fig:fig-classes-api]] mostra a interface da API, o serviço e os objetos de domínio que trafegam entre eles; a [[fig:fig-classes-nucleo]] mostra as portas do núcleo e os adaptadores de infraestrutura que as implementam. Estereótipos indicam o papel de cada classe no Spring (por exemplo, «RestController», «Service»).</p>
+<fig id="fig-classes-api" src="f9a_classes_api.svg" w="14cm" titulo="Diagrama de classes – interface da API, serviço e domínio"/>
+<fig id="fig-classes-nucleo" src="f9b_classes_nucleo.svg" w="16cm" titulo="Diagrama de classes – portas do núcleo e adaptadores de infraestrutura"/>
+<p>A [[tab:tab-classes]] especifica as operações de cada classe, com assinaturas completas e as regras que cada uma deve cumprir.</p>
+<tab id="tab-classes" titulo="Especificação das classes da API" class="compacta fixa">
+<thead><tr><th style="width:20%">Classe</th><th style="width:35%">Operações (assinatura)</th><th style="width:45%">Regras de desenho</th></tr></thead>
+<tbody>
+<tr><td>AutenticacaoController</td><td><code>ResponseEntity&lt;IdentidadeUsuarioResposta&gt; autenticar(@Valid @RequestBody SolicitacaoAutenticacao req)</code></td><td>Mapeado para <code>POST /api/v1/autenticacoes</code>, consome e produz JSON. Cria <code>Credenciais.de(req.identificador(), req.senha())</code>, chama o serviço e responde <code>200</code> com <code>Cache-Control: no-store</code>. Não contém regra de negócio.</td></tr>
+<tr><td>ManipuladorErrosApi</td><td><code>ProblemDetail tratarFalha(FalhaAutenticacaoException e)</code>; <code>tratarValidacao(MethodArgumentNotValidException e)</code>; <code>tratarIndisponibilidade(DataAccessException e)</code>; <code>tratarInesperado(Exception e)</code></td><td>Produz respectivamente 401 (com <code>WWW-Authenticate</code>), 400, 503 e 500, nos formatos do [[sec:2.5]]. Nunca inclui a senha, o motivo interno da falha ou o rastreamento de pilha.</td></tr>
+<tr><td>SolicitacaoAutenticacao</td><td><i>record</i> (<code>String identificador</code>, <code>String senha</code>); <code>String toString()</code></td><td>Anotações <code>@NotBlank @Size(max = 254)</code> e <code>@NotEmpty @Size(max = 256)</code>. <code>toString()</code> mascara a senha, impedindo seu registro acidental em <i>logs</i> (RNF05).</td></tr>
+<tr><td>IdentidadeUsuarioResposta</td><td><i>record</i> (<code>UUID id, String login, String email, String nomeExibicao, Instant autenticadoEm</code>); <code>static de(IdentidadeUsuario i)</code></td><td>Contém somente dados de identificação; nunca o <i>hash</i>.</td></tr>
+<tr><td>ServicoAutenticacao</td><td><code>IdentidadeUsuario autenticar(Credenciais c) throws FalhaAutenticacaoException</code></td><td>Implementa o algoritmo do [[sec:2.8]]. Depende apenas das portas e de um <code>Clock</code> (para o instante da autenticação, o que torna o serviço testável). Não guarda estado entre chamadas.</td></tr>
+<tr><td>Credenciais</td><td><code>static Credenciais de(String identificador, String senha)</code>; <code>String identificador()</code>; <code>char[] senha()</code>; <code>void descartarSenha()</code></td><td>Remove espaços das extremidades do identificador e o converte para minúsculas (<code>Locale.ROOT</code>); normaliza a senha em Unicode NFKC, como recomenda a NIST [[c:nist]], e a guarda em <code>char[]</code>, que <code>descartarSenha()</code> sobrescreve com zeros.</td></tr>
+<tr><td>Usuario</td><td><code>IdentidadeUsuario paraIdentidade(Instant instante)</code></td><td>Entidade lida do repositório, com o <i>hash</i>; o <i>hash</i> não sai do núcleo.</td></tr>
+<tr><td>IdentidadeUsuario</td><td>valor imutável (<code>id, login, email, nomeExibicao, autenticadoEm</code>)</td><td>Resultado do caso de uso em caso de sucesso (RF06).</td></tr>
+<tr><td>FalhaAutenticacaoException</td><td><code>MotivoFalha motivoInterno()</code>; <code>String getMessage()</code></td><td><code>MotivoFalha</code> ∈ {<code>USUARIO_INEXISTENTE</code>, <code>SENHA_INCORRETA</code>} serve apenas ao registro interno; a mensagem é sempre a mesma (RF07).</td></tr>
+<tr><td>RepositorioUsuarios / RepositorioUsuariosJdbc</td><td><code>Optional&lt;Usuario&gt; buscarPorIdentificador(String identificador)</code></td><td>Escolhe a consulta pela presença de “@”: <code>SELECT id, login, email, nome_exibicao, hash_senha FROM usuario WHERE email = ?</code> ou <code>… WHERE login = ?</code>. Sempre parametrizada, o que impede injeção de SQL.</td></tr>
+<tr><td>VerificadorSenha / VerificadorSenhaArgon2id</td><td><code>boolean verificar(char[] senha, String hash)</code>; <code>String hashFicticio()</code></td><td>Usa <code>Argon2PasswordEncoder</code> (módulo <code>spring-security-crypto</code>) com sal de 16 bytes, <i>hash</i> de 32 bytes, memória de 19 MiB, 2 iterações e paralelismo 1; os parâmetros de cada verificação são lidos da própria cadeia armazenada. O <i>hash</i> fictício é gerado na inicialização a partir de um valor aleatório, com os mesmos parâmetros. Um semáforo limita a 8 as verificações simultâneas, contendo o consumo de memória (8 × 19 MiB) (RNF07).</td></tr>
+<tr><td>RegistradorEventos / RegistradorEventosLog</td><td><code>void sucesso(String idMascarado, UUID usuarioId)</code>; <code>void falha(String idMascarado, MotivoFalha motivo)</code></td><td>Grava eventos JSON com data, resultado e identificador mascarado (ex.: <code>ma***@ex***</code>). O endereço IP é obtido pela correlação com o <i>log</i> do Nginx, que já o registra.</td></tr>
+</tbody>
+</tab>
+<p class="esq"><b>Componentes do navegador.</b> <code>ClienteApiAutenticacao.autenticar(identificador, senha)</code> devolve uma <i>Promise</i> que se resolve em um de três resultados: <code>{tipo: "AUTENTICADO", identidade}</code> para <code>200</code>, <code>{tipo: "NAO_AUTENTICADO"}</code> para <code>401</code> e <code>{tipo: "ERRO", mensagem}</code> para as demais respostas ou falhas de rede, com tempo limite de 10 s implementado com <code>AbortController</code> [[c:whatwg_fetch]]. <code>ControladorLogin</code> apresenta a mensagem correspondente e, no sucesso, limpa o campo de senha e emite o evento <code>usuario-autenticado</code> com a identidade, por meio do qual o fluxo cliente subsequente ([[fig:fig-contexto]]) continua sem que a página de login precise conhecê-lo.</p>
+
+<h2 class="bm" id="i2-8">2.8 Comportamento dinâmico da autenticação</h2>
+<div class="meta" data-item="2.8"></div>
+<p>A [[fig:fig-seq-aut]] mostra a colaboração entre os componentes durante uma autenticação, com o fragmento <code>alt</code> separando sucesso e falha; a [[fig:fig-atividade]] mostra o fluxo de decisão do serviço [[c:uml]]. Enquanto a [[fig:fig-fluxo]] ([[sec:1.3]]) descreve a requisição do ponto de vista dos softwares de apoio, estes diagramas descrevem o que acontece <i>dentro</i> da aplicação.</p>
+<fig id="fig-seq-aut" src="f10_seq_autenticacao.svg" w="16cm" titulo="Sequência de autenticação entre os componentes da solução"/>
+<p>O algoritmo do método <code>ServicoAutenticacao.autenticar</code> é:</p>
+<pre>autenticar(c: Credenciais): IdentidadeUsuario
+  id      ← c.identificador()                       // já normalizado (2.7)
+  usuario ← repositorio.buscarPorIdentificador(id)  // Optional
+  hash    ← usuario existe ? usuario.hashSenha : verificador.hashFicticio()
+  confere ← verificador.verificar(c.senha(), hash)  // sempre executado
+  c.descartarSenha()
+  se usuario existe E confere:
+      registrador.sucesso(mascarar(id), usuario.id)
+      retornar usuario.paraIdentidade(relogio.instant())
+  motivo ← usuario existe ? SENHA_INCORRETA : USUARIO_INEXISTENTE
+  registrador.falha(mascarar(id), motivo)
+  lançar FalhaAutenticacaoException(motivo)          // resposta 401 genérica</pre>
+<fig id="fig-atividade" src="f11_atividade.svg" w="8.5cm" titulo="Diagrama de atividades da decisão de autenticação"/>
+<p><b>Equalização de tempo.</b> Se o serviço retornasse imediatamente quando o usuário não existe, a resposta seria dezenas de milissegundos mais rápida do que quando a senha é verificada, e um atacante poderia descobrir quais identificadores existem medindo o tempo de resposta. Por isso a verificação Argon2id é sempre executada — contra o <i>hash</i> real ou contra o fictício, gerado com os mesmos parâmetros —, de modo que os dois caminhos tenham custo semelhante (RNF03) [[c:owasp_auth]]. A comparação final do <i>hash</i> é feita pela biblioteca em tempo constante.</p>
+<p><b>Tratamento de exceções.</b> A validação do corpo falha antes de o serviço ser chamado e resulta em <code>400</code>; a falha de autenticação resulta em <code>401</code>; uma falha de acesso ao banco, como conexão recusada ou tempo esgotado, resulta em <code>503</code>; qualquer outra exceção, em <code>500</code>. Em todos os casos, o mapeamento é feito pelo <code>ManipuladorErrosApi</code>, conforme a [[tab:tab-respostas]].</p>
+
+<h2 class="bm" id="i2-9">2.9 Implantação e configuração do ambiente operacional</h2>
+<div class="meta" data-item="2.9"></div>
+<p>A [[fig:fig-implantacao]] mostra a implantação dos contêineres nos nós físicos ou virtuais. O servidor de aplicação escuta apenas a interface de <i>loopback</i> e só é alcançado pelo Nginx; o SGBD fica em rede privada e aceita conexões cifradas apenas do servidor de aplicação (RNF06).</p>
+<fig id="fig-implantacao" src="f12_implantacao.svg" w="9cm" titulo="Diagrama de implantação"/>
+<p><b>Servidor web.</b> O trecho de configuração do Nginx abaixo materializa as decisões DA02 e DA03 e os requisitos RNF01 e RNF04: redireciona HTTP para HTTPS, aceita apenas TLS 1.2 e 1.3, envia os cabeçalhos HSTS e de política de conteúdo, entrega os arquivos da página, limita a 10 tentativas por minuto por endereço IP (com rajada de 5) e encaminha a API ao servidor de aplicação com tempos limite explícitos [[c:nginx;rfc6797]]:</p>
+<pre>limit_req_zone $binary_remote_addr zone=autenticacao:10m rate=10r/m;
+
+server { listen 80; server_name auth.example.com; return 301 https://$host$request_uri; }
+
+server {
+  listen 443 ssl;  http2 on;  server_name auth.example.com;
+  ssl_certificate     /etc/ssl/auth/fullchain.pem;
+  ssl_certificate_key /etc/ssl/auth/privkey.pem;
+  ssl_protocols       TLSv1.2 TLSv1.3;
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+  add_header Content-Security-Policy "default-src 'self'; frame-ancestors 'none'" always;
+  add_header X-Content-Type-Options nosniff always;
+  root /var/www/autenticacao;
+
+  location / { try_files $uri $uri/ =404; }
+
+  location = /api/v1/autenticacoes {
+    limit_req zone=autenticacao burst=5 nodelay;  limit_req_status 429;
+    client_max_body_size 4k;
+    proxy_pass http://127.0.0.1:8080;
+    proxy_set_header Host              $host;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 2s;  proxy_read_timeout 10s;
+  }
+}</pre>
+<p><b>Servidor de aplicação.</b> A configuração da aplicação Spring Boot define a interface de escuta, o tratamento dos cabeçalhos repassados pelo Nginx, o tamanho dos <i>pools</i> e a conexão cifrada com o banco. A senha do banco é injetada por variável de ambiente e nunca é versionada [[c:spring]]:</p>
+<pre>server:
+  address: 127.0.0.1
+  port: 8080
+  forward-headers-strategy: native   # usa X-Forwarded-* do Nginx
+  tomcat.threads.max: 50
+spring:
+  datasource:
+    url: jdbc:postgresql://bd.interno:5432/autenticacao?sslmode=verify-full
+    username: app_autenticacao
+    password: ${DB_SENHA}
+    hikari.maximum-pool-size: 10</pre>
+<p><b>Inicialização.</b> Os três serviços são unidades do <code>systemd</code>, iniciadas nesta ordem: <code>postgresql</code>, <code>autenticacao</code> e <code>nginx</code>. A unidade da aplicação executa <code>/usr/bin/java -Xms512m -Xmx512m -jar /opt/autenticacao/autenticacao.jar</code> com um usuário de sistema sem privilégios, lê <code>DB_SENHA</code> de um arquivo de ambiente legível apenas por esse usuário e é reiniciada automaticamente em caso de falha. A memória máxima da JVM comporta as 8 verificações Argon2id simultâneas definidas no [[sec:2.7]]. Antes de recarregar o Nginx, a configuração é validada com <code>nginx -t</code>.</p>
+
+<h2 class="bm" id="i2-10">2.10 Rastreabilidade entre requisitos, projeto e ambiente</h2>
+<div class="meta" data-item="2.10"></div>
+<p>A [[tab:tab-rastreabilidade]] relaciona cada requisito do [[sec:2.1]] aos elementos de projeto que o atendem, aos itens onde esses elementos são especificados e aos elementos do ambiente operacional da [[sec:1]] envolvidos. Ela permite verificar a completude do projeto — todo requisito é atendido por algum elemento — e avaliar o impacto de mudanças [[c:pressman]].</p>
+<tab id="tab-rastreabilidade" titulo="Matriz de rastreabilidade" class="compacta">
+<thead><tr><th style="width:9%">Req.</th><th style="width:43%">Elementos de projeto</th><th style="width:22%">Itens</th><th>Ambiente (Seção 1)</th></tr></thead>
+<tbody>
+<tr><td>RF01</td><td>PaginaLogin, ControladorLogin, ClienteApiAutenticacao, AutenticacaoController, SolicitacaoAutenticacao</td><td>[[sec:2.4]], [[sec:2.5]], [[sec:2.7]]</td><td>Navegador ([[sec:1.4]]); Nginx e Tomcat ([[sec:1.5]])</td></tr>
+<tr><td>RF02</td><td>Validação de SolicitacaoAutenticacao, ManipuladorErrosApi</td><td>[[sec:2.5]], [[sec:2.7]]</td><td>Spring ([[sec:1.5]])</td></tr>
+<tr><td>RF03</td><td>RepositorioUsuarios(Jdbc), tabela <code>usuario</code></td><td>[[sec:2.6]], [[sec:2.7]], [[sec:2.8]]</td><td>JDBC e PostgreSQL ([[sec:1.5]])</td></tr>
+<tr><td>RF04</td><td>VerificadorSenha(Argon2id)</td><td>[[sec:2.7]], [[sec:2.8]]</td><td>JVM ([[sec:1.2]])</td></tr>
+<tr><td>RF05</td><td>ServicoAutenticacao</td><td>[[sec:2.8]]</td><td>Tomcat ([[sec:1.5]])</td></tr>
+<tr><td>RF06</td><td>IdentidadeUsuario, IdentidadeUsuarioResposta, AutenticacaoController</td><td>[[sec:2.5]], [[sec:2.7]]</td><td>Spring ([[sec:1.5]]); navegador ([[sec:1.4]])</td></tr>
+<tr><td>RF07</td><td>FalhaAutenticacaoException, ManipuladorErrosApi</td><td>[[sec:2.5]], [[sec:2.8]]</td><td>Spring ([[sec:1.5]])</td></tr>
+<tr><td>RNF01</td><td>Configuração TLS, redirecionamento e HSTS do Nginx; DA02</td><td>[[sec:2.2]], [[sec:2.9]]</td><td>TLS ([[sec:1.3]]); Nginx ([[sec:1.5]])</td></tr>
+<tr><td>RNF02</td><td>VerificadorSenhaArgon2id; restrição <code>ck_hash_argon2id</code></td><td>[[sec:2.6]], [[sec:2.7]]</td><td>PostgreSQL ([[sec:1.5]])</td></tr>
+<tr><td>RNF03</td><td><i>Hash</i> fictício em ServicoAutenticacao; resposta 401 única</td><td>[[sec:2.5]], [[sec:2.8]]</td><td>—</td></tr>
+<tr><td>RNF04</td><td><code>limit_req</code> do Nginx</td><td>[[sec:2.9]]</td><td>Nginx ([[sec:1.5]])</td></tr>
+<tr><td>RNF05</td><td>RegistradorEventosLog; <code>toString()</code> mascarado</td><td>[[sec:2.7]]</td><td><i>Logs</i> ([[sec:1.5]])</td></tr>
+<tr><td>RNF06</td><td>Papel somente leitura; escuta em <i>loopback</i>; banco em rede privada</td><td>[[sec:2.6]], [[sec:2.9]]</td><td>Tomcat e PostgreSQL ([[sec:1.2]])</td></tr>
+<tr><td>RNF07</td><td>Semáforo do verificador; <i>pools</i> de <i>threads</i> e conexões</td><td>[[sec:2.7]], [[sec:2.9]]</td><td>Tomcat e JDBC ([[sec:1.5]])</td></tr>
+<tr><td>RNF08</td><td>API sem estado (DA08)</td><td>[[sec:2.2]], [[sec:2.3]]</td><td>Nginx como <i>proxy</i> ([[sec:1.5]])</td></tr>
+<tr><td>RNF09</td><td>Normalização NFKC em Credenciais; atributos <code>autocomplete</code> da PaginaLogin</td><td>[[sec:2.4]], [[sec:2.7]]</td><td>Navegador ([[sec:1.4]])</td></tr>
+<tr><td>RNF10</td><td>Camadas com portas e adaptadores (DA10)</td><td>[[sec:2.2]], [[sec:2.4]]</td><td>—</td></tr>
+</tbody>
+</tab>
+
+<!-- ===================================================== REFERÊNCIAS -->
+<h1 class="nova bm" id="referencias">Referências</h1>
+<!--REFERENCIAS-->
+
+<!-- ===================================================== APÊNDICES -->
+<h1 class="nova bm" id="apendice-a">Apêndice A – Registro de comunicações e reuniões da equipe</h1>
+<div class="meta" data-item="A"></div>
+<p>Este apêndice reúne os registros de comunicação e de atividades da equipe, exigidos pelo critério de interação com a equipe da avaliação individual. A comunicação ocorre em servidor do Discord com a participação da docente; as reuniões síncronas seguem o plano do [[sec:C]]. Para cada registro, a coluna “Evidência” aponta para a mensagem, ata ou captura de tela correspondente, mantida no repositório ([[sec:B]]).</p>
+<p class="aviso"><b>A preencher pela equipe:</b> os registros abaixo devem reproduzir comunicações e reuniões que de fato ocorreram (datas, participantes, decisões e evidências). Eles não foram gerados com apoio de IA, para não criar registros que não correspondam a fatos.</p>
+<tab id="tab-registros" titulo="Registro de comunicações e reuniões" class="compacta">
+<thead><tr><th style="width:11%">Data</th><th style="width:15%">Meio</th><th style="width:18%">Participantes</th><th>Assunto, decisões e encaminhamentos</th><th style="width:18%">Evidência</th></tr></thead>
+<tbody><!--REGISTROS--></tbody>
+</tab>
+
+<h1 class="nova bm" id="apendice-b">Apêndice B – Gerência de configuração no GitHub</h1>
+<div class="meta" data-item="B"></div>
+<p>Todos os artefatos deste documento estão sob gerência de configuração no repositório <code><!--REPOSITORIO--></code>, no qual a docente (adriana.silveira.souza@gmail.com) foi incluída como colaboradora. O documento é mantido como código-fonte: o texto, as figuras e o PDF são gerados a partir de arquivos versionados, de modo que cada alteração é rastreável até seu autor. A [[tab:tab-repositorio]] descreve a estrutura do repositório.</p>
+<tab id="tab-repositorio" titulo="Estrutura do repositório">
+<thead><tr><th style="width:32%">Caminho</th><th>Conteúdo</th></tr></thead>
+<tbody>
+<tr><td><code>conteudo.html</code></td><td>Texto de todos os itens de informação, com macros de citação e remissão.</td></tr>
+<tr><td><code>diagramas/</code></td><td>Fontes das figuras (Graphviz e gerador de diagramas de sequência).</td></tr>
+<tr><td><code>build.py</code>, <code>estilo.css</code></td><td>Montagem do PDF: numeração de figuras e tabelas, referências, quadro de autoria e formatação padronizada.</td></tr>
+<tr><td><code>registros_comunicacao.csv</code></td><td>Registros de comunicação apresentados no [[sec:A]].</td></tr>
+<tr><td><code>build/APS_Autenticacao_Web.pdf</code></td><td>Documento entregue, gerado a cada versão.</td></tr>
+</tbody>
+</tab>
+<p><b>Fluxo de trabalho.</b> Cada item de informação corresponde a uma <i>issue</i> no quadro Kanban do GitHub Projects, com as colunas <i>A fazer</i>, <i>Em autoria</i>, <i>Em revisão</i> e <i>Concluído</i>. O autor trabalha em um ramo próprio (por exemplo, <code>item/2.5-api</code>) e abre um <i>pull request</i> para o ramo <code>main</code>, indicando o revisor definido na [[tab:tab-autoria]]. O revisor registra seus comentários no <i>pull request</i> e só ele pode aprová-lo; o ramo <code>main</code> é protegido contra integração sem aprovação. Assim, o histórico do repositório comprova a autoria e a revisão de cada item, e o quadro Kanban permite à equipe e à docente acompanhar continuamente o andamento dos compromissos individuais ([[sec:C]]).</p>
+
+<h1 class="nova bm" id="apendice-c">Apêndice C – Planejamento do trabalho e gestão de riscos da equipe</h1>
+<div class="meta" data-item="C"></div>
+<p>O trabalho foi decomposto em unidades lógicas — os itens de informação —, e não em fatias de texto, segundo o princípio de “dividir e conquistar” do Apêndice C do enunciado da APS. A integração é garantida por dois mecanismos: a revisão cruzada, em que o autor de um item da [[sec:1]] revisa o item da [[sec:2]] que dele depende ([[tab:tab-autoria]]), e a matriz de rastreabilidade ([[sec:2.10]]).</p>
+<p><b>Atividades síncronas e assíncronas.</b> As atividades síncronas, que exigem a presença de todos, são a reunião de planejamento, a revisão de integração do documento e o ensaio da apresentação; a equipe estabelece por consenso no mínimo uma e no máximo duas atividades síncronas por semana, podendo usar as aulas práticas da disciplina. As atividades assíncronas — autoria e revisão de itens — são realizadas por cada integrante no horário de sua conveniência, com prazos registrados nas <i>issues</i> do quadro Kanban ([[sec:B]]).</p>
+<p><b>Gestão de riscos do trabalho em equipe.</b> A [[tab:tab-riscos]] registra os riscos identificados, com destaque para o risco de não cumprimento de compromisso individual. A probabilidade de cada risco é reavaliada a cada atividade síncrona, e não apenas na data de entrega; desvios são registrados no [[sec:A]] e, quando envolvem conduta ética ou profissional, comunicados à docente.</p>
+<tab id="tab-riscos" titulo="Registro de riscos do trabalho em equipe" class="compacta">
+<thead><tr><th style="width:5%">Id.</th><th style="width:22%">Risco</th><th style="width:9%">Prob. / impacto</th><th style="width:26%">Monitoramento (indicador)</th><th>Resposta planejada</th></tr></thead>
+<tbody>
+<tr><td>R1</td><td>Integrante não cumpre o compromisso de autoria ou revisão no prazo.</td><td>Média / alto</td><td><i>Issue</i> sem movimentação por mais de 2 dias ou fora da coluna esperada no quadro Kanban.</td><td>Contato registrado no Discord; replanejamento do prazo; se persistir, redistribuição do item com registro do fato e comunicação à docente.</td></tr>
+<tr><td>R2</td><td>Inconsistência ou redundância entre itens das duas seções.</td><td>Média / alto</td><td>Itens sem remissão aos itens relacionados; requisito sem linha na matriz de rastreabilidade.</td><td>Revisão cruzada entre seções; revisão de integração síncrona antes da entrega.</td></tr>
+<tr><td>R3</td><td>Uso de IA sem citação ou sem verificação do conteúdo gerado.</td><td>Média / alto</td><td>Item sem bloco de autoria/revisão ou referência não conferida no <i>pull request</i>.</td><td>Nota de uso de IA; conferência obrigatória das referências pelo revisor.</td></tr>
+<tr><td>R4</td><td>Perda ou sobrescrita de artefatos.</td><td>Baixa / alto</td><td>Conflitos de integração no repositório.</td><td>Versionamento no GitHub, ramos por item e proteção do ramo principal.</td></tr>
+<tr><td>R5</td><td>Indisponibilidade de integrante por compromissos externos.</td><td>Média / médio</td><td>Aviso prévio no Discord; ausência em atividade síncrona.</td><td>Folga de um dia no cronograma; reprogramação das tarefas assíncronas e priorização dos itens dos quais outros dependem.</td></tr>
+</tbody>
+</tab>
